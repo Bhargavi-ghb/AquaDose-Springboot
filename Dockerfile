@@ -1,35 +1,15 @@
-# =========================
-# Step 1: Build the Spring Boot application
-# Using Maven + Java 21
-# =========================
-FROM maven:3.9.4-eclipse-temurin-21 AS build
+spring.application.name=HealthRemainder
 
-# Set working directory
-WORKDIR /app
+# ---------------------------
+# Database configuration
+# ---------------------------
+spring.datasource.url=jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}
+spring.datasource.username=${MYSQLUSER}
+spring.datasource.password=${MYSQLPASSWORD}
 
-# Copy Maven POM first (for dependency caching)
-COPY pom.xml .
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
 
-# Copy source code
-COPY src ./src
-
-# Build the application (skip tests)
-RUN mvn clean package -DskipTests
-
-# =========================
-# Step 2: Run the built JAR
-# Using Java 21 runtime
-# =========================
-FROM eclipse-temurin:21-jdk
-
-# Set working directory
-WORKDIR /app
-
-# Copy the JAR from the build stage
-COPY --from=build /app/target/*.jar app.jar
-
-# Expose the port (Render uses $PORT)
-EXPOSE 8080
-
-# Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+spring.jackson.serialization.write-dates-as-timestamps=false
+spring.jpa.open-in-view=false
